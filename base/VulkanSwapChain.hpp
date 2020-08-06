@@ -520,7 +520,7 @@ public:
 	*/	
 	void createDirect2DisplaySurface(uint32_t width, uint32_t height)
 	{
-		uint32_t displayPropertyCount;
+		uint32_t displayPropertyCount = 0;
 		
 		// Get display property
 		vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertyCount, NULL);
@@ -528,7 +528,7 @@ public:
 		vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertyCount, pDisplayProperties);
 
 		// Get plane property
-		uint32_t planePropertyCount;
+		uint32_t planePropertyCount = 0;
 		vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, &planePropertyCount, NULL);
 		VkDisplayPlanePropertiesKHR* pPlaneProperties = new VkDisplayPlanePropertiesKHR[planePropertyCount];
 		vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, &planePropertyCount, pPlaneProperties);

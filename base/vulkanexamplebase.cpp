@@ -28,7 +28,7 @@ VkResult VulkanExampleBase::createInstance(bool enableValidation)
 	std::vector<const char*> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
 	// Enable surface extensions depending on os
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 	instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 	instanceExtensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
@@ -715,7 +715,7 @@ VulkanExampleBase::VulkanExampleBase(bool enableValidation)
 	initxcbConnection();
 #endif
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 	// Enable console if validation is active
 	// Debug message callback will output to it
 	if (this->settings.validation)
@@ -941,7 +941,7 @@ bool VulkanExampleBase::initVulkan()
 	return true;
 }
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 // Win32 : Sets up a console window and redirects standard output to it
 void VulkanExampleBase::setupConsole(std::string title)
 {
@@ -2212,7 +2212,7 @@ void VulkanExampleBase::windowResized()
 
 void VulkanExampleBase::initSwapchain()
 {
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 	swapChain.initSurface(windowInstance, window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 	swapChain.initSurface(androidApp->window);

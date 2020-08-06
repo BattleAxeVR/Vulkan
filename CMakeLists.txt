@@ -15,7 +15,7 @@ include_directories(external/ktx/include)
 include_directories(external/ktx/other_include)
 include_directories(base)
 
-OPTION(USE_D2D_WSI "Build the project using Direct to Display swapchain" OFF)
+OPTION(USE_D2D_WSI "Build the project using Direct to Display swapchain" ON)
 OPTION(USE_WAYLAND_WSI "Build the project using Wayland swapchain" OFF)
 
 set(RESOURCE_INSTALL_DIR "" CACHE PATH "Path to install resources to (leave empty for running uninstalled)")
@@ -34,7 +34,13 @@ IF(WIN32)
 			MESSAGE("Using bundled Vulkan library version")
 		ENDIF()
 	ENDIF()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_WIN32_KHR")
+
+	IF(USE_D2D_WSI)
+		add_definitions(-D_DIRECT2DISPLAY)
+	ELSE()
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_WIN32_KHR")
+	ENDIF()
+	
 ELSE(WIN32)
 	IF (NOT Vulkan_FOUND)
 		find_library(Vulkan_LIBRARY NAMES vulkan HINTS "$ENV{VULKAN_SDK}/lib" "${CMAKE_SOURCE_DIR}/libs/vulkan" REQUIRED)

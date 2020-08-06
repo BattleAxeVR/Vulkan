@@ -8,7 +8,7 @@
 
 #pragma once
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 #pragma comment(linker, "/subsystem:windows")
 #include <windows.h>
 #include <fcntl.h>
@@ -242,7 +242,7 @@ public:
 	/** @brief Setup the vulkan instance, enable required extensions and connect to the physical device (GPU) */
 	bool initVulkan();
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 	void setupConsole(std::string title);
 	void setupDPIAwareness();
 	HWND setupWindow(HINSTANCE hinstance, WNDPROC wndproc);
@@ -349,7 +349,7 @@ public:
 };
 
 // OS specific macros for the example main entry points
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 // Windows entry point
 #define VULKAN_EXAMPLE_MAIN()																		\
 VulkanExample *vulkanExample;																		\

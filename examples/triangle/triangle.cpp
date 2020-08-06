@@ -27,6 +27,13 @@
 #include <vulkan/vulkan.h>
 #include "vulkanexamplebase.h"
 
+#define USE_SPVS_FROM_HEADERS 1
+
+#if USE_SPVS_FROM_HEADERS
+#include "triangle.frag.spv.h"
+#include "triangle.vert.spv.h"
+#endif
+
 // Set to "true" to enable Vulkan's validation layers (see vulkandebug.cpp for details)
 #define ENABLE_VALIDATION false
 // Set to "true" to use staging buffers for uploading vertex and index data to device local memory
@@ -789,6 +796,7 @@ public:
 		VK_CHECK_RESULT(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass));
 	}
 
+#if !USE_SPVS_FROM_HEADERS
 	// Vulkan loads its shaders from an immediate binary representation called SPIR-V
 	// Shaders are compiled offline from e.g. GLSL using the reference glslang compiler
 	// This function loads such a shader from a binary file and returns a shader module structure
@@ -842,6 +850,7 @@ public:
 			return VK_NULL_HANDLE;
 		}
 	}
+#endif
 
 	void preparePipelines()
 	{
@@ -970,7 +979,21 @@ public:
 		// Set pipeline stage for this shader
 		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 		// Load binary SPIR-V shader
+
+#if USE_SPVS_FROM_HEADERS
+		// Create a new shader module that will be used for pipeline creation
+		VkShaderModuleCreateInfo vert_shader_info{};
+		vert_shader_info.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		vert_shader_info.codeSize = sizeof(triangle_vert_spv);
+		vert_shader_info.pCode    = (uint32_t *)&triangle_vert_spv[0];
+
+		VkShaderModule vert_shader;
+		VK_CHECK_RESULT(vkCreateShaderModule(device, &vert_shader_info, NULL, &vert_shader));
+
+		shaderStages[0].module = vert_shader;
+#else
 		shaderStages[0].module = loadSPIRVShader(getShadersPath() + "triangle/triangle.vert.spv");
+#endif
 		// Main entry point for the shader
 		shaderStages[0].pName = "main";
 		assert(shaderStages[0].module != VK_NULL_HANDLE);
@@ -980,7 +1003,22 @@ public:
 		// Set pipeline stage for this shader
 		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		// Load binary SPIR-V shader
+
+#if USE_SPVS_FROM_HEADERS
+		// Create a new shader module that will be used for pipeline creation
+		VkShaderModuleCreateInfo frag_shader_info{};
+		frag_shader_info.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		frag_shader_info.codeSize = sizeof(triangle_frag_spv);
+		frag_shader_info.pCode    = (uint32_t *) &triangle_frag_spv[0];
+		
+		VkShaderModule frag_shader;
+		VK_CHECK_RESULT(vkCreateShaderModule(device, &frag_shader_info, NULL, &frag_shader));
+
+		shaderStages[1].module = frag_shader;
+#else
 		shaderStages[1].module = loadSPIRVShader(getShadersPath() + "triangle/triangle.frag.spv");
+#endif
+
 		// Main entry point for the shader
 		shaderStages[1].pName = "main";
 		assert(shaderStages[1].module != VK_NULL_HANDLE);
@@ -1097,7 +1135,7 @@ public:
 // OS specific macros for the example main entry points
 // Most of the code base is shared for the different supported operating systems, but stuff like message handling diffes
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !defined(_DIRECT2DISPLAY)
 // Windows entry point
 VulkanExample *vulkanExample;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
