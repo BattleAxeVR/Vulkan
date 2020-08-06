@@ -135,12 +135,13 @@ public:
 		err = vkCreateXcbSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface);
 #endif
 
-		if (err != VK_SUCCESS) {
+		if (err != VK_SUCCESS) 
+		{
 			vks::tools::exitFatal("Could not create surface!", err);
 		}
 
 		// Get available queue family properties
-		uint32_t queueCount;
+		uint32_t queueCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
 		assert(queueCount >= 1);
 
@@ -151,6 +152,7 @@ public:
 		// Find a queue with present support
 		// Will be used to present the swap chain images to the windowing system
 		std::vector<VkBool32> supportsPresent(queueCount);
+
 		for (uint32_t i = 0; i < queueCount; i++) 
 		{
 			fpGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &supportsPresent[i]);
@@ -206,15 +208,25 @@ public:
 		queueNodeIndex = graphicsQueueNodeIndex;
 
 		// Get list of supported surface formats
-		uint32_t formatCount;
-		VK_CHECK_RESULT(fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, NULL));
+		uint32_t formatCount             = 0;
+		VkResult get_physical_device_res = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, NULL);
+
+		if (get_physical_device_res != VK_SUCCESS)
+		{
+			return;
+		}
 		assert(formatCount > 0);
 
 		std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-		VK_CHECK_RESULT(fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data()));
+		get_physical_device_res = fpGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
+
+		if (get_physical_device_res != VK_SUCCESS)
+		{
+			return;
+		}
 
 		// If the surface format list only includes one entry with VK_FORMAT_UNDEFINED,
-		// there is no preferered format, so we assume VK_FORMAT_B8G8R8A8_UNORM
+		// there is no preferred format, so we assume VK_FORMAT_B8G8R8A8_UNORM
 		if ((formatCount == 1) && (surfaceFormats[0].format == VK_FORMAT_UNDEFINED))
 		{
 			colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
